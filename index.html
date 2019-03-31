@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CRUD Karyawan</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link rel="stylesheet" href="//cdn.materialdesignicons.com/3.4.93/css/materialdesignicons.min.css">
+</head>
+<body>
+	<div class="container">
+		<div style="display: flex;justify-content: space-between;margin-top: 50px;">
+			<p class="h4"><span class="mdi mdi-app"></span> CRUD AJAX JQUERY MYSQL BY ROMADHAN</p>
+			<a href="#" id="openModal" class="btn btn-primary" data-toggle="modal" data-target="#form_modal">Tambah Data</a>
+		</div>
+		<button id="openModalFunction" data-toggle="modal" data-target="#form_modal" style="display: none;"></button>
+		<br><br>
+		<table class="table table-bordered">
+		  <thead>
+		    <tr>
+		      <th scope="col">ID</th>
+		      <th scope="col">NIP</th>
+		      <th scope="col">Nama</th>
+		      <th scope="col">Jenis Kelamin</th>
+		      <th scope="col">Alamat</th>
+		      <th scope="col">Foto</th>
+		      <th scope="col">Aksi</th>
+		    </tr>
+		  </thead>
+		  <tbody id="list_data">
+		    
+		  </tbody>
+		</table>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="form_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="modal_title">Tambah Data</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="modal_close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<form method="POST" id="form_submit" enctype="multipart/form-data">
+			  <div class="form-group">
+			    <label for="nip">NIP</label>
+			    <input type="text" name="nip" class="form-control" id="nip" placeholder="NIP">
+			  </div>
+			  <div class="form-group">
+			    <label for="nama">Nama</label>
+			    <input type="text" name="nama" class="form-control" id="nama" placeholder="Nama">
+			  </div>
+			  <div class="form-group">
+			    <label for="jenis_kelamin">Jenis Kelamin</label>
+			    <select class="form-control" id="jenis_kelamin" name="jenis_kelamin"></select>
+			  </div>
+			  <div class="form-group">
+			    <label for="alamat">Alamat</label>
+			    <input type="text" name="alamat" class="form-control" id="alamat" placeholder="Alamat">
+			  </div>
+			  <div class="form-group">
+			  	<img src="" id="img_show" style="width: 50px;height: 50px;"><br>
+			    <label for="foto">Foto</label>
+			    <input type="file" name="foto" class="form-control" id="foto" placeholder="Foto" multiple>
+			  </div>
+			  <input type="hidden" name="status" value="Tambah" id="actionStatus">
+			  <input type="hidden" name="id" id="data_id">
+			  <button type="submit" class="btn btn-primary" id="btn_submit">Tambah</button>
+			</form>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<script>
+		$('#jenis_kelamin').append("<option value=''></option>");
+		$('#jenis_kelamin').append("<option value='Laki-laki'>Laki-laki</option>");
+		$('#jenis_kelamin').append("<option value='Perempuan'>Perempuan</option>");
+		load();
+		function load()
+		{
+			$.ajax({
+				url: "API/read.php",
+				method: "POST",
+				success:function(data){
+					$('#list_data').html(data);
+				}
+			});
+		}
+		$('#openModal').click(function(){
+			$('#form_submit')[0].reset();
+			$('#actionStatus').val('Tambah');
+			$('#btn_submit').html('Tambah');
+			$('#modal_title').html('Tambah Data');
+			$('#img_show').css('display', 'none');
+		});
+		$('#form_submit').submit(function(e){
+			e.preventDefault();
+			$('#btn_submit').attr('disabled', 'disabled');
+			$.ajax({
+				url: "API/controller.php",
+				method: "POST",
+				data: new FormData(this),
+				contentType: false,
+	            cache: false,
+	            processData:false,
+				success: function(data){
+					load();
+					$('#btn_submit').attr('disabled', false);
+					$('#modal_close').click();
+					$('#form_submit')[0].reset();
+				}
+			});
+		});
+
+		$("#foto").change(function() {
+	        var file = this.files[0];
+	        var imagefile = file.type;
+	        var match= ["image/jpeg","image/png","image/jpg"];
+	        if(!((imagefile==match[0]) || (imagefile==match[1]) || (imagefile==match[2]))){
+	            alert('Please select a valid image file (JPEG/JPG/PNG).');
+	            $("#foto").val('');
+	            return false;
+	        }
+	    });
+
+		$(document).on('click', '.edit', function(e){
+			e.preventDefault();
+			var id = $(this).attr("id");
+			var status = "get_data";
+			$.ajax({
+				url: "API/controller.php",
+				method: "POST",
+				data: {id:id, status:status},
+				dataType: "json",
+				success: function(data){
+					$('#nip').val(data.nip);
+					$('#nama').val(data.nama);
+					$('#jenis_kelamin').val(data.jenis_kelamin);
+					$('#alamat').val(data.alamat);
+					$('#img_show').css('display', 'block');
+					$('#img_show').attr('src', "./images/"+data.foto);
+					$('#data_id').val(id);
+					$('#actionStatus').val('Edit');
+					$('#btn_submit').html('Edit');
+					$('#openModalFunction').click();
+				}
+			});
+		});
+
+		$(document).on('click', '.hapus', function(){
+			var id = $(this).attr("id");
+			var status = "Hapus";
+
+			$.ajax({
+				url: "API/controller.php",
+				method: "POST",
+				data: {id:id, status:status},
+				success: function(data){
+					load();
+				}
+			});
+		});
+	</script>
+</body>
+</html>
